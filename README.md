@@ -1,2 +1,2 @@
 # github-issues-exporter
-Exports all GitHub issues to various formats
+Exports GitHub issues to various formats
