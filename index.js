@@ -87,6 +87,82 @@ importer.readIssues = function (options, callback) {
 };
 
 importer.createSheet = function (options, issues, callback) {
-    console.dir(issues);
-    callback()
+    issues = issues.filter(function (issue) {
+      issue.lines = issue.body.split(/[\r]?\n/);
+      return issue.lines[0][0] === '#';
+    }).map(importer.parseIssue);
+
+    issues.forEach(function (issue) {
+      console.log('--------------------------------\n\n');
+      console.dir(issue.parsed);
+      // console.dir(issue.lines);
+      console.log('\n\n--------------------------------\n\n');
+    });
+    callback();
 }
+
+var speakerParser = /^\s*[\*-] ([\w\(\)]+)\s*:\s+(.*)$/,
+    bioParser = /^##\s?Speaker Bio/i;
+
+importer.parseIssue = function (issue) {
+  var parsed = issue.parsed = { speaker: {} };
+  var lines = issue.lines.slice();
+  var maybeSummary = [];
+
+  //
+  // Parses a single speaker line from this header:
+  // * "Property    : Value"
+  //
+  function parseSpeakerInfo(line) {
+    if (!line || !line.length) { return; }
+
+    var match;
+    if ((match = speakerParser.exec(line))) {
+      parsed.speaker[match[1].toLowerCase()] = match[2];
+    } else {
+      maybeSummary.push(line);
+    }
+  }
+
+  //
+  // 1. Parse the title, then parse out the speaker
+  // details
+  //
+  parsed.title = lines.shift().replace(/^# /, '');
+  while (lines.length && lines[0].substr(0, 2) !== '##') {
+    parseSpeakerInfo(lines.shift());
+  }
+
+  if (maybeSummary.length && process.env.DEBUG) {
+    console.log('Maybe summary: %s %s', parsed.title, maybeSummary)
+  }
+
+  //
+  // 2. Parse out the actual talk summary:
+  // - Folks really don't know how to write a summary
+  // - Or follow a template
+  // - So this is basically a huge hack.
+  // - Since this isn't a proper state machine.
+  //
+  var len = maybeSummary.length;
+  if (!len || maybeSummary[len - 1].length < 50) {
+    lines.shift();
+    parsed.summary = [];
+    while (lines.length && !bioParser.test(lines[0])) {
+      parsed.summary.push(lines.shift());
+    }
+  } else {
+    parsed.summary = maybeSummary;
+  }
+
+  //
+  // 3. Parse out the actual speaker bio
+  //
+  lines.shift();
+  parsed.speaker.bio = [];
+  while (lines.length && lines[0].substr(0, 2) !== '##') {
+    parsed.speaker.bio.push(lines.shift());
+  }
+
+  return issue;
+};
