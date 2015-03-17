@@ -16,7 +16,7 @@ var importer = module.exports = function (options, callback) {
   // account username to access GitHub repo
   options.commentor = 'hackygolucky';
   // name of file to export to
-  options.file = path.join(__dirname, 'empirejs-cfp.xlsx');
+  options.file = path.join(__dirname, 'cascadia-cfp.xlsx');
   options.github = new GitHubApi({
     // required
     version: "3.0.0",
@@ -99,7 +99,24 @@ importer.createSheet = function (options, issues, callback) {
       console.log('\n\n--------------------------------\n\n');
     });
     callback();
-}
+
+    var workbook = new Excel.Workbook()
+      , sheet = workbook.addWorksheet("Talk Reviews");
+
+    worksheet.columns = [
+        { header: "Title", key: "title", width: 40 },
+        { header: "Name", key: "speaker", width: 30 },
+        { header: "Location", key: "location", width: 30 },
+        { header: "Email", key: "email", width: 40 },
+        { header: "Twitter", key: "twitter", width: 20 },
+        { header: "GitHub", key: "github", width: 20 },
+        { header: "Url(s)", key: "urls", width: 30 },
+        { header: "Summary", key: "summary", width: 60 },
+        { header: "Speaker Bio", key: "bio", width: 30}
+    ];
+
+
+} 
 
 var speakerParser = /^\s*[\*-] ([\w\(\)]+)\s*:\s+(.*)$/,
     bioParser = /^##\s?Speaker Bio/i;
