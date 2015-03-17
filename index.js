@@ -101,7 +101,8 @@ importer.createSheet = function (options, issues, callback) {
     callback();
 
     var workbook = new Excel.Workbook()
-      , sheet = workbook.addWorksheet("Talk Reviews");
+      , sheet = workbook.addWorksheet("Talk Reviews")
+      , row;
 
     worksheet.columns = [
         { header: "Title", key: "title", width: 40 },
@@ -117,17 +118,19 @@ importer.createSheet = function (options, issues, callback) {
     
     // for each issue in issues, insert the issue object properties into 
     // subsequent columns in row[i] 
-    row.values = {
-        title: title,
-        speaker: speaker,
-        location: speaker.location,
-        email: speaker.email,
-        twitter: speaker.twitter,
-        github: speaker.github, 
-        urls: speaker.urls,
-        summary: summary,
-        bio: speaker.bio
-    };  
+    for(var i; i < issues.length; i++){
+      worksheet.addRow({
+          title: title,
+          speaker: speaker,
+          location: speaker.location,
+          email: speaker.email,
+          twitter: speaker.twitter,
+          github: speaker.github, 
+          urls: speaker.urls,
+          summary: summary,
+          bio: speaker.bio
+      }
+    };
 } 
 
 var speakerParser = /^\s*[\*-] ([\w\(\)]+)\s*:\s+(.*)$/,
