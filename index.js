@@ -114,8 +114,20 @@ importer.createSheet = function (options, issues, callback) {
         { header: "Summary", key: "summary", width: 60 },
         { header: "Speaker Bio", key: "bio", width: 30}
     ];
-
-
+    
+    // for each issue in issues, insert the issue object properties into 
+    // subsequent columns in row[i] 
+    row.values = {
+        title: title,
+        speaker: speaker,
+        location: speaker.location,
+        email: speaker.email,
+        twitter: speaker.twitter,
+        github: speaker.github, 
+        urls: speaker.urls,
+        summary: summary,
+        bio: speaker.bio
+    };  
 } 
 
 var speakerParser = /^\s*[\*-] ([\w\(\)]+)\s*:\s+(.*)$/,
